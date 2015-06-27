@@ -1,0 +1,9 @@
+{
+  "name": "voice-memo",
+  "version": "0.0.1",
+  "description": "voice memo messaging",
+  "dependencies": {
+    "express": "^4.10.2",
+    "socket.io": "^1.3.5"
+  }
+}

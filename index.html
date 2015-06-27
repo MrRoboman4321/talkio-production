@@ -1,0 +1,60 @@
+<script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+<script src="chat.js"></script>
+<script>
+
+</script>
+
+<!--====================HTML====================!-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>talk.io</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" type="css" href="stylesheet.css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:400,300' rel='stylesheet' type='text/css'>
+    </head>
+      <body>
+        <div class="container-fluid">
+<!--====================HEADER====================!-->
+            <div class='col-md-12' id='header'>
+                <h1 class='jumbotron' id='title'>talk.io</h1>
+            </div>
+<!--====================BUTTONS====================!-->
+            <div class="btn-group-vertical col-md-8" role="group" aria-label="...">
+                <button title='Record' class="btn btn-default btn-lg " id='record'><span class='glyphicon glyphicon-bullhorn'></span></button>
+                <button title='Stop' class="btn btn-default btn-lg" id='stop'><span class='glyphicon glyphicon-stop'></span></button>
+                <button title='Review' class="btn btn-default btn-lg" id="review"><span class='glyphicon glyphicon-headphones'></span></button>
+                <button title='Send' class="btn btn-default btn-lg" id="send"><span class='glyphicon glyphicon-send'></span></button>
+            </div>
+<!--====================USER FEED====================!-->
+            <div class='col-md-2'>
+                <ul class='list-group' id='userFeed'>
+                    <lh class='list-group-item'><b>Online</b></lh>
+                </ul>
+            </div>
+            <div class='col-md-2'>
+                <ul class='list-group' id='recordingFeed'>
+                    <lh class='list-group-item'><b>Recording</b></lh>
+                </ul>
+            </div>
+
+
+
+
+
+            <audio id='localPlay'>
+                <source src='' id='localSource' type='audio/mp3'></source>
+            </audio>
+
+            <audio id='globalPlay'>
+                <source src='' id='globalSource' type='audio/mp3'></source>
+            </audio>
+
+            
+        </div>
+    </body>
+</html>
