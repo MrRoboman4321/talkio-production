@@ -1,4 +1,4 @@
-var express = require('express');
+var express = require('express'); 
 var socketio = require('socket.io');
 var logger = require('tracer').colorConsole( //Automagically add the time format before each message, no matter the type
 	{
