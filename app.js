@@ -1,6 +1,6 @@
 var express = require('express');
 var socketio = require('socket.io');
-var logger = require('tracer').colorConsole(
+var logger = require('tracer').colorConsole( //Automagically add the time format before each message, no matter the type
 	{
 		format : [
 		    timeFormat() + " {{message}}"
@@ -19,7 +19,7 @@ logger.warn("App started!");
 
 io.on('connection', function(socket) {
 	socket.emit("getUsername");
-	socket.on('username', function(data) {
+	socket.on('username', function(data) { //Will be changed to secure user login once implemented
 		for(var i = 0; i<users.length; i++) {
 			socket.emit('newUser', {user: users[i]});
 		}
