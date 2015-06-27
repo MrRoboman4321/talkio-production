@@ -1,5 +1,11 @@
 var express = require('express');
 var socketio = require('socket.io');
+var logger = require('tracer').colorConsole(
+	{
+		format : [
+		    timeFormat() + " {{message}}"
+		]
+	});
 
 var app = express();
 
@@ -9,6 +15,8 @@ var io = socketio.listen(server);
 var users = [];
 var sockets = [];
 
+logger.warn("App started!");
+
 io.on('connection', function(socket) {
 	socket.emit("getUsername");
 	socket.on('username', function(data) {
@@ -17,7 +25,7 @@ io.on('connection', function(socket) {
 		}
 		users.push(data.username);
 		sockets.push(socket);
-		console.log(timeFormat() + users.toString());
+		logger.info("Users: " + users.toString());
 		io.sockets.emit('newUser', {user: data.username});
 
 		socket.on('recording', function() {
@@ -28,11 +36,11 @@ io.on('connection', function(socket) {
 			io.sockets.emit('userNotRecording', {user: data.username});
 		});
 		socket.on('blob', function(data) {
-			console.log(timeFormat() + data.toString());
+			logger.info(data.toString());
             io.sockets.emit('play', {from: data.username, blob: data.blob});
 	    });
 	});
-	console.log(timeFormat() + "A user connected!");
+	logger.info("A user connected!");
 
 	socket.on('disconnect', function() {
          index = sockets.indexOf(socket);
@@ -40,8 +48,8 @@ io.on('connection', function(socket) {
          io.sockets.emit('userLeft', {user: users[index]});
          users.splice(index, 1);
 
-         console.log(timeFormat() + "A user disconnected.")
-         console.log(timeFormat() + users.toString());
+         logger.info("A user disconnected.")
+         logger.info("Users: " + users.toString());
 	});
 })
 
