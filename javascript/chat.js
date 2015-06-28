@@ -171,7 +171,6 @@ function success(e){
 }
 
 $('button#send').click(function() {
-	console.log("Swag emit");
 	socket.emit('blob', {username: username, blob: blob});
 });
 

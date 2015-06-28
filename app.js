@@ -48,8 +48,8 @@ io.on('connection', function(socket) {
 			io.sockets.emit('userNotRecording', {user: data.username});
 		});
 		socket.on('blob', function(data) {
-			logger.info(data.toString());
-            io.sockets.emit('play', {from: data.username, blob: data.blob});
+			logger.info(data.username);
+            io.sockets.emit('play', {username: data.username, blob: data.blob});
 	    });
 	});
 	logger.info("A user connected!");
