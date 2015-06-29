@@ -1,5 +1,9 @@
 $(document).ready(function() {
-  var socket = io();
+var socket = io();
+
+if(Cookies.get('token') != null || Cookies.get('token') != "") {
+    socket.emit('loginToken', {token: Cookies.get('token')});
+}
 
 var leftchannel = [];
 var rightchannel = [];
@@ -13,7 +17,10 @@ var audioContext = null;
 var context = null;
 var outputString;
 var blob = null;
+
 var username = null;
+var loggedin = false;
+var token = null;
 
 // feature detection 
 if (!navigator.getUserMedia)
@@ -32,7 +39,7 @@ if (navigator.getUserMedia){
     // if R is pressed, we start recording
     $('button#record').click(function() {
     	if(!recording) {
-    		socket.emit('recording');
+    		socket.emit('recording', {token: Cookies.get('token')});
     	}
         blob = null;
     	console.log("Record pressed");
@@ -42,7 +49,7 @@ if (navigator.getUserMedia){
         recordingLength = 0;
     });
     $('button#stop').click(function() {
-    	socket.emit('stoppedRecording');
+    	socket.emit('stoppedRecording', {token: Cookies.get('token')});
         
         // we stop recording
         recording = false;
@@ -178,12 +185,20 @@ $('button#review').click(function() {
     document.getElementById('localPlay').play();
 });
 
+$('button#login').click(function() {
+    console.log($('#username').val());
+    socket.emit('loginNormal', {username: $('#username').val(), password: $('#password').val()})
+});
+
+
+/* ORIGINAL "LOGIN" SYSTEM, VERY OUTDATED
 socket.on('getUsername', function() {
     username = prompt("Username plz");
     socket.emit('username', {username: username});
 });
+*/
 
-socket.on('play', function(data) {
+socket.on('play', function(data) { //Will change on implement rooms
 	console.log(data.blob);
 	data.blob = new Blob([data.blob], { type : 'audio/wav' });
 	console.log(data.blob);
@@ -223,6 +238,23 @@ socket.on('userRecording', function(data) {
 socket.on('userNotRecording', function(data) {
 	var li = document.getElementById(data.user + "Recording");
 	li.parentNode.removeChild(li);
+});
+
+socket.on('registrationComplete', function() {
+    alert("Registration complete! Now login.");
+});
+
+socket.on('token', function(data) {
+    Cookies.set('token', data.token, {expires: 7});
+});
+
+socket.on('registerError', function(data) {
+    alert(data.type);
+});
+
+socket.on('loginError', function(data) {
+    console.log("Login error!");
+    alert(data.type);
 });
 
 });
