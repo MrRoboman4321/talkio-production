@@ -11,7 +11,6 @@ var audioInput = null;
 var sampleRate = null;
 var audioContext = null;
 var context = null;
-var outputElement = document.getElementById('output');
 var outputString;
 var blob = null;
 var username = null;
@@ -25,7 +24,7 @@ if (navigator.getUserMedia){
     navigator.getUserMedia({audio:true}, success, function(e) {
     alert('Error capturing audio: ' + e);
     });
-} else alert('getUserMedia not supported in this browser.');
+} else alert('getUserMedia not supported in this browser. Switch to the newest version of chrome.');
 
 // when key is down
 
@@ -172,8 +171,7 @@ function success(e){
 }
 
 $('button#send').click(function() {
-	console.log("Swag emit");
-	socket.emit('blob', {blob: blob});
+	socket.emit('blob', {username: username, blob: blob});
 });
 
 $('button#review').click(function() {
@@ -190,7 +188,9 @@ socket.on('play', function(data) {
 	data.blob = new Blob([data.blob], { type : 'audio/wav' });
 	console.log(data.blob);
     if(data.username != username) {
-	   var url = (window.URL || window.webkitURL).createObjectURL(data.blob);
+        console.log(username);
+        console.log(data.username);
+	    var url = (window.URL || window.webkitURL).createObjectURL(data.blob);
         document.getElementById('globalSource').src = url;
         document.getElementById('globalPlay').load()
         document.getElementById('globalPlay').play()
