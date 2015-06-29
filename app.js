@@ -1,11 +1,23 @@
 var express = require('express'); 
 var socketio = require('socket.io');
+var fs = require('fs');
 var logger = require('tracer').colorConsole( //Automagically add the time format before each message, no matter the type
 	{
 		format : [
 		    timeFormat() + " {{message}}"
 		]
 	});
+
+var fs = require('fs');
+var file = 'db.sqlite';
+var dbexists = fs.existsSync(file);
+var sqlite = require('sqlite3').verbose();
+var db = new sqlite.Database(file);
+
+if(!dbexists) {
+	db.run("CREATE TABLE users (name TEXT, pass TEXT, level INTEGER, salt TEXT)");
+	db.run("CREATE TABLE rooms (name TEXT, owner TEXT, mods TEXT, private BOOL, messages TEXT, topic TEXT, nsfw BOOL)");
+}
 
 var app = express();
 
@@ -36,8 +48,8 @@ io.on('connection', function(socket) {
 			io.sockets.emit('userNotRecording', {user: data.username});
 		});
 		socket.on('blob', function(data) {
-			logger.info(data.toString());
-            io.sockets.emit('play', {from: data.username, blob: data.blob});
+			logger.info(data.username);
+            io.sockets.emit('play', {username: data.username, blob: data.blob});
 	    });
 	});
 	logger.info("A user connected!");
