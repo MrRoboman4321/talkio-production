@@ -52,12 +52,15 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('loginNormal', function(data) { //IMPLEMENTED
-		logger.log(data.password);
 		login(data.username, data.password, socket);
-	})
+	});
+
+	socket.on('logout', function() {
+		logout(socket);
+	});
 
 	socket.on('disconnect', function() {
-		logout(socket);
+		disconnect(socket);
 	});
 })
 
@@ -82,14 +85,15 @@ function timeFormat() { //Nice time format
 	return "[" + d.getHours().toString() + ":" + d.getMinutes().toString() + "] ";
 }
 
-function register(data) { //DB calls to register a user
+function register(data, socket) { //DB calls to register a user
 	if(data.username.length > 15) {
 		socket.emit('registerError', {type: 'tooLong'});
 		return;
 	} else if(data.username == null || data.username == "" || data.password == null || data.password == "" || data.email == null || data.email == "") {
 		socket.emit('registerError', {type: 'missing'});
 		return;
-	}	db.serialize(function(){
+	}	
+	db.serialize(function(){
 		db.get("SELECT rowid AS id FROM users WHERE name = ? COLLATE NOCASE", data.username, function(err, row){
 			if(row != undefined) {
 				socket.emit('registerError', {type: 'userTaken'});
@@ -103,25 +107,17 @@ function register(data) { //DB calls to register a user
 			});
 	    });
 	});
-
-	return finReturn;
 }
 
 function login(username, pHash, socket) { //DB calls to login the user
-	logger.log(username + "69");
-	logger.log(pHash);
 	db.serialize(function() {
 		db.get('SELECT * FROM users WHERE user = ?', [username], function(err, res) {
-			logger.log(res);
 			if(typeof res == 'undefined') {
-				//logger.log("Bad User!");
 				socket.emit('loginError', {type: 'badUser'});
 				return;
 			} 
 
 			bcrypt.compare(pHash, res.pass, function(err, same) {
-				logger.log(same);
-				logger.log(err);
 				if(!same) {
 					socket.emit('loginError', {type: 'badPass'});
 					return;
@@ -133,6 +129,7 @@ function login(username, pHash, socket) { //DB calls to login the user
 }
 
 function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
+	socket.emit('loggedIn');
 	var token = genNewToken();
 	if(type == 'nonToken') {
 		db.serialize(function() {
@@ -143,7 +140,8 @@ function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
 		});
 	} else {
 		nameindex = userTokens.indexOf(data.token);
-		data.username = persistantUser[nameindex];
+		data.username = persistantUsers[nameindex];
+		logger.log(data.username);
 	}
 	for(var i = 0; i<users.length; i++) {
 		socket.emit('newUser', {user: users[i]}); //IMPLEMENTED
@@ -204,6 +202,15 @@ function logout(socket, token) { //If something is invalid about the session or 
     users.splice(index, 1);
     userTokens.splice(userTokens.indexOf(token), 1);
     persistantUsers.splice(userTokens.indexOf(token), 1);
-    logger.info("A user disconnected.");
+    logger.info("A user logged out.");
+    logger.info("Users: " + users.toString());
+}
+
+function disconnect(socket) {
+	index = sockets.indexOf(socket);
+	sockets.splice(index, 1);
+	io.sockets.emit('userLeft', {user: users[index]});
+	users.splice(index, 1);
+	logger.info("A user disconnected");
     logger.info("Users: " + users.toString());
 }

@@ -2,6 +2,7 @@ $(document).ready(function() {
 var socket = io();
 
 if(Cookies.get('token') != null || Cookies.get('token') != "") {
+    console.log(Cookies.get('token'));
     socket.emit('loginToken', {token: Cookies.get('token')});
 }
 
@@ -186,8 +187,25 @@ $('button#review').click(function() {
 });
 
 $('button#login').click(function() {
-    console.log($('#username').val());
-    socket.emit('loginNormal', {username: $('#username').val(), password: $('#password').val()})
+    if(loggedin) {
+        socket.emit('logout');
+        Cookies.remove('token');
+        location.reload();
+        return
+    }
+    if($('#username').val() != "") {
+        if($('#password').val() != "" && $('#registerEmail').val() == "" && $('#registerUsername').val() == "" && $('#registerPassword').val() == "") {
+            socket.emit('loginNormal', {username: $('#username').val(), password: $('#password').val()});
+        } else {
+            alert("Please check you have filled out the form correctly!");
+        }
+    } else if($('#registerUsername').val() != "") {
+        if($('#registerPassword').val() != "" && $('#username').val() == "" && $('#password').val() == "") {
+            socket.emit('register', {username: $('#registerUsername').val(), password: $('#registerPassword').val(), email: $('#registerEmail').val()});
+        } else {
+            alert("Please check you have filled out the form correctly!");
+        }
+    }
 });
 
 
@@ -255,6 +273,12 @@ socket.on('registerError', function(data) {
 socket.on('loginError', function(data) {
     console.log("Login error!");
     alert(data.type);
+});
+
+socket.on('loggedIn', function() {
+    loggedin = true;
+    $('#login').html('Logout');
+    $('#loginModal').modal('hide');
 });
 
 });
