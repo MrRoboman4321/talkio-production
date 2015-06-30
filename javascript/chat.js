@@ -1,5 +1,10 @@
 $(document).ready(function() {
-  var socket = io();
+var socket = io();
+
+if(Cookies.get('token') != null || Cookies.get('token') != "") {
+    console.log(Cookies.get('token'));
+    socket.emit('loginToken', {token: Cookies.get('token')});
+}
 
 var leftchannel = [];
 var rightchannel = [];
@@ -11,10 +16,12 @@ var audioInput = null;
 var sampleRate = null;
 var audioContext = null;
 var context = null;
-var outputElement = document.getElementById('output');
 var outputString;
 var blob = null;
+
 var username = null;
+var loggedin = false;
+var token = null;
 
 // feature detection 
 if (!navigator.getUserMedia)
@@ -25,7 +32,7 @@ if (navigator.getUserMedia){
     navigator.getUserMedia({audio:true}, success, function(e) {
     alert('Error capturing audio: ' + e);
     });
-} else alert('getUserMedia not supported in this browser.');
+} else alert('getUserMedia not supported in this browser. Switch to the newest version of chrome.');
 
 // when key is down
 
@@ -33,7 +40,7 @@ if (navigator.getUserMedia){
     // if R is pressed, we start recording
     $('button#record').click(function() {
     	if(!recording) {
-    		socket.emit('recording');
+    		socket.emit('recording', {token: Cookies.get('token')});
     	}
         blob = null;
     	console.log("Record pressed");
@@ -43,7 +50,7 @@ if (navigator.getUserMedia){
         recordingLength = 0;
     });
     $('button#stop').click(function() {
-    	socket.emit('stoppedRecording');
+    	socket.emit('stoppedRecording', {token: Cookies.get('token')});
         
         // we stop recording
         recording = false;
@@ -172,25 +179,51 @@ function success(e){
 }
 
 $('button#send').click(function() {
-	console.log("Swag emit");
-	socket.emit('blob', {blob: blob});
+	socket.emit('blob', {username: username, blob: blob});
 });
 
 $('button#review').click(function() {
     document.getElementById('localPlay').play();
 });
 
+$('button#login').click(function() {
+    if(loggedin) {
+        socket.emit('logout');
+        Cookies.remove('token');
+        location.reload();
+        return
+    }
+    if($('#username').val() != "") {
+        if($('#password').val() != "" && $('#registerEmail').val() == "" && $('#registerUsername').val() == "" && $('#registerPassword').val() == "") {
+            socket.emit('loginNormal', {username: $('#username').val(), password: $('#password').val()});
+        } else {
+            alert("Please check you have filled out the form correctly!");
+        }
+    } else if($('#registerUsername').val() != "") {
+        if($('#registerPassword').val() != "" && $('#username').val() == "" && $('#password').val() == "") {
+            socket.emit('register', {username: $('#registerUsername').val(), password: $('#registerPassword').val(), email: $('#registerEmail').val()});
+        } else {
+            alert("Please check you have filled out the form correctly!");
+        }
+    }
+});
+
+
+/* ORIGINAL "LOGIN" SYSTEM, VERY OUTDATED
 socket.on('getUsername', function() {
     username = prompt("Username plz");
     socket.emit('username', {username: username});
 });
+*/
 
-socket.on('play', function(data) {
+socket.on('play', function(data) { //Will change on implement rooms
 	console.log(data.blob);
 	data.blob = new Blob([data.blob], { type : 'audio/wav' });
 	console.log(data.blob);
     if(data.username != username) {
-	   var url = (window.URL || window.webkitURL).createObjectURL(data.blob);
+        console.log(username);
+        console.log(data.username);
+	    var url = (window.URL || window.webkitURL).createObjectURL(data.blob);
         document.getElementById('globalSource').src = url;
         document.getElementById('globalPlay').load()
         document.getElementById('globalPlay').play()
@@ -223,6 +256,29 @@ socket.on('userRecording', function(data) {
 socket.on('userNotRecording', function(data) {
 	var li = document.getElementById(data.user + "Recording");
 	li.parentNode.removeChild(li);
+});
+
+socket.on('registrationComplete', function() {
+    alert("Registration complete! Now login.");
+});
+
+socket.on('token', function(data) {
+    Cookies.set('token', data.token, {expires: 7});
+});
+
+socket.on('registerError', function(data) {
+    alert(data.type);
+});
+
+socket.on('loginError', function(data) {
+    console.log("Login error!");
+    alert(data.type);
+});
+
+socket.on('loggedIn', function() {
+    loggedin = true;
+    $('#login').html('Logout');
+    $('#loginModal').modal('hide');
 });
 
 });
