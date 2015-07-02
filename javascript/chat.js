@@ -1,7 +1,7 @@
 $(document).ready(function() {
 var socket = io();
 
-if(Cookies.get('token') != null || Cookies.get('token') != "") {
+if(Cookies.get('token') != null && Cookies.get('token') != "") {
     console.log(Cookies.get('token'));
     socket.emit('loginToken', {token: Cookies.get('token')});
 }
@@ -231,12 +231,14 @@ socket.on('play', function(data) { //Will change on implement rooms
 });
 
 socket.on('newUser', function(data) {
-	var list = document.getElementById('userFeed');
-	var li = document.createElement("li");
-	li.appendChild(document.createTextNode(data.user));
-	li.setAttribute('id', data.user + "List");
-    li.setAttribute('class', 'list-group-item');
-	list.appendChild(li);
+    if(loggedin) {
+	   var list = document.getElementById('userFeed');
+	   var li = document.createElement("li");
+	   li.appendChild(document.createTextNode(data.user));
+	   li.setAttribute('id', data.user + "List");
+        li.setAttribute('class', 'list-group-item');
+	   list.appendChild(li);
+    }
 });
 
 socket.on('userLeft', function(data) {
