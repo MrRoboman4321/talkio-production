@@ -5,7 +5,7 @@ var fs = require('fs');
 var logger = require('tracer').colorConsole( //Automagically add the time format before each message, no matter the type
 	{
 		format : [
-		    timeFormat() + " {{message}}"
+		    timeFormat() + " {{message}} (in {{file}}:{{line}})"
 		]
 	});
 
@@ -40,13 +40,15 @@ io.on('connection', function(socket) {
 		register(data, socket);
 	});
 	socket.on('loginToken', function(data) { //IMPLEMENTED
-		token = userTokens.indexOf(data.token);
-		if(token == -1) {
+		token = userTokens[userTokens.indexOf(data.token)];
+		logger.info(token);
+		if(typeof token == 'undefined') {
 			socket.emit('clearToken');
 			db.serialize(function() {
 				db.run("DELETE FROM sessions WHERE token = ?", [data.token]);
 			});
 		} else {
+			logger.log(token);
 			onLoggedIn(data, socket, "token");
 		}
 	});
@@ -129,7 +131,6 @@ function login(username, pHash, socket) { //DB calls to login the user
 }
 
 function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
-	socket.emit('loggedIn');
 	var token = genNewToken();
 	if(type == 'nonToken') {
 		db.serialize(function() {
@@ -139,16 +140,17 @@ function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
 			persistantUsers.push(data.username);
 		});
 	} else {
+		logger.log(userTokens);
+		logger.log(persistantUsers);
 		nameindex = userTokens.indexOf(data.token);
 		data.username = persistantUsers[nameindex];
 		logger.log(data.username);
 	}
+	socket.emit('loggedIn', {username: data.username});
 	for(var i = 0; i<users.length; i++) {
 		socket.emit('newUser', {user: users[i]}); //IMPLEMENTED
 	} 
-	users.push(data.username);
-	userTokens.push(token);
-	sockets.push(socket);
+	users.push(data.username);	sockets.push(socket);
 	logger.info("Users: " + users.toString());
 	io.sockets.emit('newUser', {user: data.username}); //IMPLEMENTED
 	logger.info("A user connected!");
@@ -177,6 +179,9 @@ function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
 		    io.sockets.emit('play', {username: persistantUsers[userTokens.indexOf(data.token)], blob: data.blob}); //IMPLEMENTED
 		}
 		logger.info(data.username);
+    });
+    socket.on('joinRoom', function(data) {
+
     });
 }
 
@@ -207,6 +212,7 @@ function logout(socket, token) { //If something is invalid about the session or 
 }
 
 function disconnect(socket) {
+	socket.emit('reload');
 	index = sockets.indexOf(socket);
 	sockets.splice(index, 1);
 	io.sockets.emit('userLeft', {user: users[index]});

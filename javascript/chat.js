@@ -1,7 +1,7 @@
 $(document).ready(function() {
 var socket = io();
 
-if(Cookies.get('token') != null || Cookies.get('token') != "") {
+if(Cookies.get('token') != null && Cookies.get('token') != "") {
     console.log(Cookies.get('token'));
     socket.emit('loginToken', {token: Cookies.get('token')});
 }
@@ -179,7 +179,7 @@ function success(e){
 }
 
 $('button#send').click(function() {
-	socket.emit('blob', {username: username, blob: blob});
+	socket.emit('blob', {token: Cookies.get('token'), blob: blob, username: username});
 });
 
 $('button#review').click(function() {
@@ -231,12 +231,14 @@ socket.on('play', function(data) { //Will change on implement rooms
 });
 
 socket.on('newUser', function(data) {
-	var list = document.getElementById('userFeed');
-	var li = document.createElement("li");
-	li.appendChild(document.createTextNode(data.user));
-	li.setAttribute('id', data.user + "List");
-    li.setAttribute('class', 'list-group-item');
-	list.appendChild(li);
+    if(loggedin) {
+	   var list = document.getElementById('userFeed');
+	   var li = document.createElement("li");
+	   li.appendChild(document.createTextNode(data.user));
+	   li.setAttribute('id', data.user + "List");
+       li.setAttribute('class', 'list-group-item');
+	   list.appendChild(li);
+    }
 });
 
 socket.on('userLeft', function(data) {
@@ -275,10 +277,18 @@ socket.on('loginError', function(data) {
     alert(data.type);
 });
 
-socket.on('loggedIn', function() {
+socket.on('loggedIn', function(data) {
     loggedin = true;
+    username = data.username;
     $('#login').html('Logout');
     $('#loginModal').modal('hide');
+});
+
+socket.on('reload', function() {
+    alert("Something went wrong! Reloading the webpage...");
+    setTimeout(function() {
+        location.reload();
+    });
 });
 
 });
