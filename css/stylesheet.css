@@ -23,7 +23,41 @@
 	margin-top: 19.5px;
 	margin-bottom: 19.5px;
 }
-/***********MAIN BUTTONS***********/
-	#mainBtns {
+/***********NAVBAR***********/
+#navbar {
+	border: 1px solid lightgrey;
+	border-radius: 6px;
+	padding: 10px;
+	z-index: 1;
+	height: 500px;
+}
+a.navLink:link
+{
+   color: #333333;
+   text-decoration: none;
+}
+a.navLink:visited
+{
+   color: #333333;
+   text-decoration: none;
+}
+a.navLink:hover
+{
+   color: #333333;
+   text-decoration: none;
+}
+a.navLink:active
+{
+   color: #333333;
+   text-decoration: none;
+}
+
+/***********FEEDS***********/
+#userFeed {
+	float: right;
+}
+#recordingFeed {
+	float: right;
+}
 		
 	
