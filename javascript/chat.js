@@ -179,7 +179,7 @@ function success(e){
 }
 
 $('button#send').click(function() {
-	socket.emit('blob', {username: username, blob: blob});
+	socket.emit('blob', {token: Cookies.get('token'), blob: blob});
 });
 
 $('button#review').click(function() {
