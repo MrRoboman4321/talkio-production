@@ -131,7 +131,6 @@ function login(username, pHash, socket) { //DB calls to login the user
 }
 
 function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
-	socket.emit('loggedIn');
 	var token = genNewToken();
 	if(type == 'nonToken') {
 		db.serialize(function() {
@@ -147,6 +146,7 @@ function onLoggedIn(data, socket, type) { //Equivelant of old socket.on('login')
 		data.username = persistantUsers[nameindex];
 		logger.log(data.username);
 	}
+	socket.emit('loggedIn', {username: data.username});
 	for(var i = 0; i<users.length; i++) {
 		socket.emit('newUser', {user: users[i]}); //IMPLEMENTED
 	} 
@@ -212,6 +212,7 @@ function logout(socket, token) { //If something is invalid about the session or 
 }
 
 function disconnect(socket) {
+	socket.emit('reload');
 	index = sockets.indexOf(socket);
 	sockets.splice(index, 1);
 	io.sockets.emit('userLeft', {user: users[index]});

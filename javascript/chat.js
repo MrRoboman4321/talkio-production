@@ -179,7 +179,7 @@ function success(e){
 }
 
 $('button#send').click(function() {
-	socket.emit('blob', {token: Cookies.get('token'), blob: blob});
+	socket.emit('blob', {token: Cookies.get('token'), blob: blob, username: username});
 });
 
 $('button#review').click(function() {
@@ -236,7 +236,7 @@ socket.on('newUser', function(data) {
 	   var li = document.createElement("li");
 	   li.appendChild(document.createTextNode(data.user));
 	   li.setAttribute('id', data.user + "List");
-        li.setAttribute('class', 'list-group-item');
+       li.setAttribute('class', 'list-group-item');
 	   list.appendChild(li);
     }
 });
@@ -277,10 +277,18 @@ socket.on('loginError', function(data) {
     alert(data.type);
 });
 
-socket.on('loggedIn', function() {
+socket.on('loggedIn', function(data) {
     loggedin = true;
+    username = data.username;
     $('#login').html('Logout');
     $('#loginModal').modal('hide');
+});
+
+socket.on('reload', function() {
+    alert("Something went wrong! Reloading the webpage...");
+    setTimeout(function() {
+        location.reload();
+    });
 });
 
 });
