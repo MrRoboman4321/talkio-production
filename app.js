@@ -12,6 +12,7 @@ var logger = require('tracer').colorConsole( //Automagically add the time format
 var fs = require('fs');
 var file = 'db.sqlite';
 var dbexists = fs.existsSync(file);
+console.log(dbexists);
 var sqlite = require('sqlite3').verbose();
 var db = new sqlite.Database(file);
 
@@ -67,19 +68,19 @@ io.on('connection', function(socket) {
 })
 
 app.get('/', function(req, res) {
-	res.sendFile(__dirname + '\\index.html');
+	res.sendFile(__dirname + '/index.html');
 });
 
 app.get('/stylesheet.css', function(req, res) {
-	res.sendFile(__dirname + '\\css\\stylesheet.css');
+	res.sendFile(__dirname + '/css/stylesheet.css');
 });
 
 app.get('/chat.js', function(req, res) {
-	res.sendFile(__dirname + '\\javascript\\chat.js');
+	res.sendFile(__dirname + '/javascript/chat.js');
 });
 
 app.get('/cookie.js', function(req, res) {
-	res.sendFile(__dirname + "\\javascript\\cookie.js");
+	res.sendFile(__dirname + "/javascript/cookie.js");
 });
 
 function timeFormat() { //Nice time format
