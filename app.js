@@ -113,6 +113,8 @@ function register(data, socket) { //DB calls to register a user
 			});
 	    });
 	});
+
+	onLoggedIn(data, socket, 'nonToken');
 }
 
 function login(username, pHash, socket) { //DB calls to login the user
