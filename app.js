@@ -16,13 +16,16 @@ console.log(dbexists);
 var sqlite = require('sqlite3').verbose();
 var db = new sqlite.Database(file);
 
-if(!dbexists) {
-	db.run("CREATE TABLE users (user TEXT, pass TEXT, email TEXT, level INTEGER)");
-	db.run("CREATE TABLE rooms (name TEXT, owner TEXT, mods TEXT, private BOOL, messages TEXT, topic TEXT, lang BOOL, autoplay BOOL)");
-	db.run("CREATE TABLE sessions (user TEXT, token TEXT)");
-}
+//fixes issue with db commands not executing in the right order
+db.serialize(function(){
+	if(!dbexists) {
+		db.run("CREATE TABLE users (user TEXT, pass TEXT, email TEXT, level INTEGER)");
+		db.run("CREATE TABLE rooms (name TEXT, owner TEXT, mods TEXT, private BOOL, messages TEXT, topic TEXT, lang BOOL, autoplay BOOL)");
+		db.run("CREATE TABLE sessions (user TEXT, token TEXT)");
+	}
+	db.run("DELETE FROM sessions");
+});
 
-db.run("DELETE FROM sessions");
 
 var app = express();
 

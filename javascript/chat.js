@@ -178,21 +178,7 @@ function success(e){
     recorder.connect (context.destination); 
 }
 
-$('button#send').click(function() {
-	socket.emit('blob', {token: Cookies.get('token'), blob: blob, username: username});
-});
-
-$('button#review').click(function() {
-    document.getElementById('localPlay').play();
-});
-
-$('button#login').click(function() {
-    if(loggedin) {
-        socket.emit('logout');
-        Cookies.remove('token');
-        location.reload();
-        return
-    }
+function doLoginRegister(){
     if($('#username').val() != "") {
         if($('#password').val() != "" && $('#registerEmail').val() == "" && $('#registerUsername').val() == "" && $('#registerPassword').val() == "") {
             socket.emit('loginNormal', {username: $('#username').val(), password: $('#password').val()});
@@ -206,6 +192,32 @@ $('button#login').click(function() {
             alert("Please check you have filled out the form correctly!");
         }
     }
+}
+
+$('button#send').click(function() {
+	socket.emit('blob', {token: Cookies.get('token'), blob: blob, username: username});
+});
+
+$('button#review').click(function() {
+    document.getElementById('localPlay').play();
+});
+
+$('button#login').click(function() {
+    if(loggedin) {
+        socket.emit('logout');
+        Cookies.remove('token');
+        location.reload();
+        return;
+    }
+    doLogin();
+});
+
+$('input#password').keypress(function(e){
+    if(e.which == 13) doLoginRegister();
+});
+
+$('input#registerPassword').keypress(function(e){
+    if(e.which == 13) doLoginRegister();
 });
 
 
