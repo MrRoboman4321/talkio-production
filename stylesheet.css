@@ -51,7 +51,9 @@ a.navLink:active
    color: #333333;
    text-decoration: none;
 }
-
+#navSpacer {
+	height: 10px;
+	}
 /***********FEEDS***********/
 #userFeedDiv {
 	float: right;
