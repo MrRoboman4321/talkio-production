@@ -54,6 +54,10 @@ a.navLink:active
 #navSpacer {
 	height: 10px;
 	}
+.roomCheckModal {
+	display: inline-block;
+	font-size: 110%;
+}
 /***********FEEDS***********/
 #userFeedDiv {
 	float: right;
